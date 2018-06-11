@@ -1,0 +1,49 @@
+#######################################
+# Syntax Coloring Map For VLC-Transciever
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Transciever	              KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+startTransmitter					KEYWORD2
+stopTransmitter						KEYWORD2
+startReciever							KEYWORD2
+stopReciever							KEYWORD2
+sendData									KEYWORD2
+lastTransmissionComplete	KEYWORD2
+transmitterIsStarted			KEYWORD2
+recieverIsStarted					KEYWORD2
+isRecieving								KEYWORD2
+hadRecieverError					KEYWORD2
+receptionSuccessful				KEYWORD2
+getImage									KEYWORD2
+getBitmap                 KEYWORD2
+getPixelValue             KEYWORD2
+setPixelValue             KEYWORD2
+getHeight                 KEYWORD2
+getWidth                  KEYWORD2
+getSize                   KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+MATRIX_PIN								LITERAL1
+RECIEVER_PIN							LITERAL1
+TRANSMITTER_PIN						LITERAL1
+BUTTON_UP									LITERAL1
+BUTTON_DOWN								LITERAL1
+BUTTON_RIGHT		          LITERAL1
+BUTTON_LEFT			          LITERAL1
+BUTTON_ENTER		          LITERAL1
+RED												LITERAL1
+BLUE											LITERAL1
+LED_STATUS_1		          LITERAL1
+LED_STATUS_2	            LITERAL1
