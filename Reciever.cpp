@@ -1,9 +1,10 @@
 #include <Reciever.h>
 
 Reciever::Reciever() :
-  _bitBuffer(8),
-  _image(IMAGE_WIDTH, IMAGE_HEIGHT)
+  _bitBuffer(8)
 {
+  _currentReception.type=0;
+  _lastReception.type=0;
   _started = false;
   _pin = 0;
   _hadError = false;
@@ -46,21 +47,16 @@ bool Reciever::receptionSuccessful() {
 
 void Reciever::switchState() {
   unsigned long t = micros() - _lastTime;
-  //Serial.println(t);
   _lastTime = micros();
   switch (_state) {
     //Idle
     case State::RX_IDLE:
       if (IN_T1(t)) {
         clear();
-        //Serial.println("Continue Idle");
       } else if(IN_T2(t)) {
         _state = State::RX_START_RECEPTION;
         _value = digitalRead(_pin);
         pushValue(_value);
-        //Serial.println("Idle to Start");
-        //Serial.print("Value is ");
-        //Serial.println(_value);
       } else {
         handleError();
       }
@@ -72,14 +68,12 @@ void Reciever::switchState() {
       if(IN_T1(t)) {
         handleError();
         _state = State::RX_IDLE;
-        //Serial.println("Start to Idle");
       //if recorded period is 2T
       } else if(IN_T2(t)) {
         _state = State::RX_BIT_ALTERATION;
         _value = !_value;
         pushValue(_value);
         _recieving = true;
-        //Serial.println("Start to Alt");
       } else {
         handleError();
         _state = State::RX_IDLE;
@@ -101,13 +95,11 @@ void Reciever::switchState() {
             _state = State::RX_IDLE;
           } else {
             _state = State::RX_BIT_ALTERATION;
-            //Serial.println("Continue Alt");
           }
         }
       //if recorded period is T
       } else if(IN_T1(t)) {
         _state = State::RX_BIT_REPITITION1;
-        //Serial.println("Alt to Rep1");
       } else {
         handleError();
         _state = State::RX_IDLE;
@@ -128,7 +120,6 @@ void Reciever::switchState() {
             _state = State::RX_IDLE;
           } else {
             _state = State::RX_BIT_REPITITION2;
-            //Serial.println("Rep1 to Rep2");
           }
         }
       //if recorded period is 2T or anything else
@@ -143,7 +134,6 @@ void Reciever::switchState() {
       //if recorded period is T
       if(IN_T1(t)) {
         _state = State::RX_BIT_REPITITION1;
-        //Serial.println("Rep2 to Rep1");
       //if recorded period is 2T
       } else if(IN_T2(t)) {
         _value = !_value;
@@ -157,7 +147,6 @@ void Reciever::switchState() {
             _state = State::RX_IDLE;
           } else {
             _state = State::RX_BIT_ALTERATION;
-            //Serial.println("Rep2 to Alt");
           }
         }
       //if recorded period is 2T or anything else
@@ -178,18 +167,34 @@ void Reciever::process(uint8_t value) {
     case ProcessState::FETCH_PREAMBLE:
       checkPreamble(); // ...check it.
       break;
-    // if the preamble was correct, fetch the data...
+    // if the preamble was correct, fetch the data type...
+    case ProcessState::FETCH_TYPE:
+      readType();
+      break;
+    // if the type has been fetched, fetch the size next...
+    case ProcessState::FETCH_SIZE:
+      readSize();
+      break;
+    // if the size has been fetched, fetch the data...
     case ProcessState::FETCH_DATA:
       // if all data has been recieved...
-      if(_recievedByteCtr == IMAGE_HEIGHT+1)
-        _processState = ProcessState::DATA_COMPLETE; // ...go to the next step
+      if(_recievedByteCtr == _dataSize[0]+1)
+        _processState = ProcessState::PROCESS_DATA; // ...go to the next step
       break;
     // if the data is complete...
-    case ProcessState::DATA_COMPLETE:
+    case ProcessState::PROCESS_DATA:
       // ...check the checksum...
       if(checksumCorrect()) {
         _success = true;
-        buildImage(); //...and build the image if it was correct...
+        //... and if it was correct, build whatever we received.
+        switch (_currentReception.type) {
+          case 1: //string
+            buildString();
+            break;
+          case 2: //bitmap
+            buildImage();
+            break;
+        }
         _processState = ProcessState::RECEPTION_FINISHED;
       } else {
         _processState = ProcessState::ERROR; // ...or signal an error.
@@ -206,28 +211,16 @@ void Reciever::process(uint8_t value) {
 }
 
 void Reciever::pushValue(uint8_t value) {
-  //Serial.println("In pushValue");
-  // Serial.print("Pushed Value ");
-  // Serial.println(value);
   // if the _bitBuffer is full (holds an entire byte)...
   if(!_bitBuffer.push(value)) {
     uint8_t byte = 0;
     //...empty out _bitBuffer...
     while (!_bitBuffer.isEmpty()) {
-      // Serial.println("_bitbuffer full");
       uint8_t ctr = _bitBuffer.getCount();
-      // Serial.print(ctr);
-      // Serial.println(" bits left in buffer");
-      // Serial.print("Pushing ");
-      // Serial.println(_bitBuffer.peek(), BIN);
       byte |= _bitBuffer.pop() << (ctr - 1);
-      // Serial.print("Pushed to ");
-      // Serial.println(byte, BIN);
     }
     //...save byte in the _data array...
     _data[_recievedByteCtr] = byte;
-    // Serial.print("Recieved Data:");
-    // Serial.println(_data[_recievedByteCtr], BIN);
 
     _recievedByteCtr++;
     //...and finally push the value
@@ -241,7 +234,7 @@ void Reciever::checkPreamble() {
   if (_recievedByteCtr == 1) {
     //...check if it is the PREAMBLE...
     if (_data[0] == PREAMBLE) {
-      _processState = ProcessState::FETCH_DATA;
+      _processState = ProcessState::FETCH_TYPE;
     } else {
       _processState = ProcessState::ERROR;
     }
@@ -251,26 +244,75 @@ void Reciever::checkPreamble() {
   }
 }
 
+void Reciever::readType() {
+  //if there is an entire byte in the buffer...
+  if (_recievedByteCtr == 1) {
+    //... read it and put it into the transmission...
+    _currentReception.type = _data[0]; //1: string, 2: bitmap
+    _processState = ProcessState::FETCH_SIZE;
+    //... and reset the counter and data back to 0
+    _recievedByteCtr = 0;
+    _data[0] = 0;
+  }
+}
+
+void Receiver::readSize() {
+  //distinguish between bitmap and string. Btimap has two sizes, string has one.
+  switch (_currentReception.type) {
+    case 1: //string
+      //if the single size byte has been received...
+      if(_recievedByteCtr == 1) {
+        //... read it to the first position of _dataSize...
+        _currentReception.size[0] = _data[0];
+        _currentReception.size[1] = 0; //... and clear the second position just to be safe
+        //also reset the counter and data back to 0
+        _recievedByteCtr = 0;
+        _data[0] = 0;
+      }
+      break;
+    case 2: //bitmap
+      //if the two size bytes have been received...
+      if(_recievedByteCtr == 2) {
+        //... read them into _dataSize...
+        _currentReception.size[0] = _data[0];
+        _currentReception.size[1] = _data[1];
+        //... and reset the counter and data back to 0
+        _recievedByteCtr = 0;
+        _data[0] = 0;
+        _data[1] = 0;
+      }
+  }
+}
+
 bool Reciever::checksumCorrect() {
   uint8_t recievedChecksum = 0;
-  for (uint8_t i = 0; i < IMAGE_HEIGHT; i++) {
+  for (uint8_t i = 0; i < _currentReception.size[0]; i++) {
     recievedChecksum += _data[i];
     recievedChecksum %= 256;
   }
-  return (recievedChecksum == _data[IMAGE_HEIGHT]);
+  return (recievedChecksum == _data[_currentReception.size[0]]);
 
 }
 
+//TODO!!!! ----------------------------------------- !!!!! --------------------------------
 void Reciever::buildImage() {
-  uint8_t map[IMAGE_HEIGHT];
-  for(uint8_t a = 0; a < IMAGE_HEIGHT; a++) {
+  _lastReception.type = 2;
+  uint8_t size = _currentReception.size[0];
+  uint8_t height = _currentReception.size[1];
+  uint8_t width = size / height;
+  _lastReception.data.bitmap = LEDBitmap(width, height);
+
+  uint8_t map[size];
+  for(uint8_t a = 0; a < size; a++) {
     map[a] = _data[a];
   }
-  _image.buildFromBytemap(map);
+
+  _lastReception.data.bitmap.buildFromBytemap(map);
 }
 
-LEDBitmap Reciever::getImage() {
-  return _image;
+void Reciever::buildString() {
+  _lastReception.type = 1;
+  _lastReception.data.string = String(_data); // This SHOULD work
 }
 
 void Reciever::handleError() {
@@ -284,4 +326,22 @@ void Reciever::clear() {
   _bitBuffer.flush();
   _recievedByteCtr = 0;
   _recieving = false;
+}
+
+LEDBitmap Reciever::getImage() {
+  if(_lastReception.type==2)
+    return _lastReception.data.bitmap;
+  else
+    return LEDBitmap(0, 0);
+}
+
+String Receiver::getString() {
+  if(_lastReception.type==1)
+    return _lastReception.data.String;
+  else
+    return String("");
+}
+
+int Receiver::getType() {
+  return _lastReception.type;
 }

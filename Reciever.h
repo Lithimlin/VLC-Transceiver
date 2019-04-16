@@ -17,8 +17,10 @@
 #define IN_T1(t) ((t > T1_LOW) && (t < T1_HIGH))
 #define IN_T2(t) ((t > T2_LOW) && (t < T2_HIGH))
 
-#define IMAGE_HEIGHT  8
-#define IMAGE_WIDTH   8
+typedef union Data {
+  LEDBitmap bitmap;
+  String string;
+} Data;
 
 class Reciever
 {
@@ -36,6 +38,8 @@ class Reciever
     bool hadError();
     bool receptionSuccessful();
     LEDBitmap getImage();
+    String getString();
+    int getType();
 
 
 
@@ -51,8 +55,10 @@ class Reciever
 
     enum class ProcessState{
       FETCH_PREAMBLE,
+      FETCH_TYPE,
+      FETCH_SIZE,
       FETCH_DATA,
-      DATA_COMPLETE,
+      PROCESS_DATA,
       RECEPTION_FINISHED,
       ERROR
     };
@@ -63,11 +69,18 @@ class Reciever
     bool _success;
     int _pin;
     unsigned long _lastTime;
-    uint8_t _data[12];
-    uint8_t _recievedByteCtr;
+    struct LastReception {
+      uint8_t type;
+      Data data;
+    } _lastReception;
+    struct CurrentReception {
+      uint8_t type;
+      uint8_t size[2];
+    } _currentReception;
+    uint8_t _data[260];
+    uint16_t _recievedByteCtr;
     uint8_t _value;
     SimpleFIFO _bitBuffer;
-    LEDBitmap _image;
     State _state;
     ProcessState _processState;
     static Reciever* _instance = nullptr;
@@ -75,7 +88,10 @@ class Reciever
     void process(uint8_t value);
     void pushValue(uint8_t value);
     void checkPreamble();
+    void readType();
+    void readSize();
     bool checksumCorrect();
+    void buildString();
     void buildImage();
     void handleError();
     void clear();

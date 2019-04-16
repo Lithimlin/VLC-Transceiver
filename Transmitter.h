@@ -9,6 +9,11 @@
 #define MAX_BYTE_FRAME_SIZE 10
 #define MAX_BIT_FRAME_SIZE  MAX_BYTE_FRAME_SIZE*8
 
+typedef struct Frame{
+  size_t size = 0;
+  uint8_t* data;
+} Frame;
+
 class Transmitter
 {
   public:
@@ -16,7 +21,8 @@ class Transmitter
     virtual ~Transmitter() {  };
 
   public: //methods
-    int sendData(LEDBitmap image);
+    int sendData(LEDBitmap &image);
+    int sendData(String &string);
     void transmitBit();
     void start();
     void stop();
@@ -27,8 +33,7 @@ class Transmitter
 
   private: //members
     uint8_t _state;
-    uint8_t _frame[MAX_BIT_FRAME_SIZE];
-    uint16_t _frameSize;
+    Frame _frame;
     uint16_t _pos;
     uint8_t _manHalf;
     int _pin;
@@ -36,8 +41,9 @@ class Transmitter
     bool _active;
     static Transmitter *_instance = nullptr;
 
-    int prepFrame(LEDBitmap image);
-    uint8_t buildBitFrame(uint8_t* frame, uint8_t size, uint8_t* outFrame, size_t outFrameSize);
+    int _prepFrame(LEDBitmap &image);
+    int _prepFrame(String &string);
+    uint8_t _buildBitFrame(uint8_t* frame, uint8_t &size);
     static void _transmitBit();
 
 };

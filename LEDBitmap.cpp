@@ -5,6 +5,7 @@ LEDBitmap::LEDBitmap(uint8_t const width, uint8_t const height) {
   if(width == 0)  _width = 8;
   _height = height;
   if(height == 0) _height = 8;
+  _data = (uint8_t*)malloc(_height*sizeof(uint8_t))
 }
 
 LEDBitmap::LEDBitmap(uint8_t width, uint8_t height, int data[]) {
@@ -12,6 +13,7 @@ LEDBitmap::LEDBitmap(uint8_t width, uint8_t height, int data[]) {
   if(width == 0)  _width = 8;
   _height = height;
   if(height == 0) _height = 8;
+  _data = (uint8_t*)malloc(_height*sizeof(uint8_t))
 
   for (uint8_t h = 0; h < height; h++) {
     uint8_t binary = 0x00;
@@ -23,6 +25,10 @@ LEDBitmap::LEDBitmap(uint8_t width, uint8_t height, int data[]) {
     }
     _data[h] = binary;
   }
+}
+
+LEDBitmap::~LEDBitmap(){
+  free(_data);
 }
 
 uint8_t LEDBitmap::getPixelValue(uint8_t x, uint8_t y) {

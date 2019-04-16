@@ -11,7 +11,7 @@ class LEDBitmap
   public:
     LEDBitmap(uint8_t width, uint8_t height, int data[]);
     LEDBitmap(uint8_t width, uint8_t height);
-    virtual ~LEDBitmap() {    };
+    virtual ~LEDBitmap();
 
   public: //methods
     uint8_t* getBitmap();
@@ -36,7 +36,7 @@ class LEDBitmap
   private: //members
     uint8_t _width;
     uint8_t _height;
-    uint8_t _data[MAX_IMAGE_HEIGHT];
+    uint8_t *_data;
 
 };
 
