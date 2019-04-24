@@ -18,6 +18,7 @@ class Transmitter
 {
   public:
     Transmitter();
+    Transmitter(int frequency = 1000);
     virtual ~Transmitter() {  };
 
   public: //methods
@@ -26,6 +27,7 @@ class Transmitter
     void transmitBit();
     void start();
     void stop();
+    int setFrequency(int frequency);
     bool lastTransmissionComplete();
     bool isStarted() { return _active; };
     void setPin(int pin);

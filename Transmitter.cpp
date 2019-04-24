@@ -12,6 +12,17 @@ Transmitter::Transmitter()
   Timer2.initialize();
 }
 
+Transmitter::Transmitter(int frequency)
+{
+  _pin = 0;
+  _pos = 0;
+  _manHalf = 0;
+  _busy = false;
+  _state = 0;
+  _active = false;
+  Timer2.initialize(frequency);
+}
+
 Transmitter* Transmitter::_instance;
 
 /**
@@ -218,6 +229,14 @@ void Transmitter::start() {
 void Transmitter::stop() {
   Timer2.detachInterrupt();
   _active = false;
+}
+
+int Transmitter::setFrequency(int frequency) {
+  if(_active) {
+    return 1;
+  }
+  Timer2.initialize(frequency);
+  return 0;
 }
 
 static void Transmitter::_transmitBit() {

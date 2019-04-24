@@ -5,7 +5,7 @@
 #include "LEDBitmap.h"
 #include "Constants.h"
 
-#define T1 TRANSMIT_PERIOD
+#define T1 _transmit_period
 #define T2 T1*2
 #define TOLERANCE T1*RECIEVE_TOLERANCE
 
@@ -26,6 +26,7 @@ class Reciever
 {
   public:
     Reciever();
+    Reciever(int frequency = 1000);
     virtual ~Reciever() {   };
 
   public: //methods
@@ -33,6 +34,7 @@ class Reciever
     int getPin() { return _pin; }
     void start();
     void stop();
+    int setFrequency(int frequency);
     bool isRecieving() { return _recieving; };
     bool isStarted() { return _started; };
     bool hadError();
@@ -63,6 +65,7 @@ class Reciever
       ERROR
     };
 
+    uint16_t _transmit_period;
     bool _started;
     bool _recieving;
     bool _hadError;

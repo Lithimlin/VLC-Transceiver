@@ -3,6 +3,21 @@
 Reciever::Reciever() :
   _bitBuffer(8)
 {
+  _transmit_period = TRANSMIT_PERIOD;
+  _currentReception.type=0;
+  _lastReception.type=0;
+  _started = false;
+  _pin = 0;
+  _hadError = false;
+  _state = State::RX_IDLE;
+  _lastTime = micros();
+  clear();
+}
+
+Receiver::Reciever(int frequency) :
+  _bitBuffer(8)
+{
+  _transmit_period = (1/frequency)*1000000; //(1/f)*10^6
   _currentReception.type=0;
   _lastReception.type=0;
   _started = false;
@@ -31,6 +46,14 @@ static void Reciever::_switchState() {
 void Reciever::stop() {
   detachInterrupt(digitalPinToInterrupt(_pin));
   _started = false;
+}
+
+int setFrequency(int frequency) {
+  if(_started) {
+    return 1;
+  }
+  _transmit_period = (1/frequency)*1000000; //(1/f)*10^6
+  return 0;
 }
 
 bool Reciever::hadError() {
