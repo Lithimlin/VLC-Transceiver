@@ -35,10 +35,10 @@ void TimerTwo::initialize(int frequency) {
       prescaler = 0 |= _BV(C22);
       value = 124;
     } break;
-    case 4000: { //4kHz
+    /*case 4000: { //4kHz
       prescaler = 0 |= _BV(C21) |= _BV(C20);
       value = 124;
-    } break;
+    } break;*/ //Currently not usable as the filter controller is too slow
     default: { //1kHz
       prescaler = 0 |= _BV(C22);
       value = 249;
