@@ -9,9 +9,9 @@ ISR(TIMER2_COMPA_vect) {    //ISR on Compare Match A
 void TimerTwo::initialize(int frequency) {
   /** Prescalers:
     * http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf#G3.1197678
-    * Prescaler 32 : C21, C20
-    * Prescaler 64 : C22
-    * Prescaler 128: C22, C20
+    * Prescaler 32 : CS21, CS20
+    * Prescaler 64 : CS22
+    * Prescaler 128: CS22, CS20
     *
     * 500Hz: Prescaler 128, OCR2A: 249
     * 1kHz: Prescaler 64, OCR2A: 249
@@ -24,23 +24,23 @@ void TimerTwo::initialize(int frequency) {
   uint8_t value = 0;
   switch (frequency) {
     case 500: { //500Hz
-      prescaler = 0 |= _BV(C22) |= _BV(C20);
+      prescaler = 0 |= _BV(CS22) |= _BV(CS20);
       value = 249;
     } break;
     case 1000: { //1kHz
-      prescaler = 0 |= _BV(C22);
+      prescaler = 0 |= _BV(CS22);
       value = 249;
     } break;
     case 2000: { //2kHz
-      prescaler = 0 |= _BV(C22);
+      prescaler = 0 |= _BV(CS22);
       value = 124;
     } break;
     /*case 4000: { //4kHz
-      prescaler = 0 |= _BV(C21) |= _BV(C20);
+      prescaler = 0 |= _BV(CS21) |= _BV(CS20);
       value = 124;
     } break;*/ //Currently not usable as the filter controller is too slow
     default: { //1kHz
-      prescaler = 0 |= _BV(C22);
+      prescaler = 0 |= _BV(CS22);
       value = 249;
     } break;
   }
