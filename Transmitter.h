@@ -6,9 +6,6 @@
 #include "Constants.h"
 #include "LEDBitmap.h"
 
-#define MAX_BYTE_FRAME_SIZE 10
-#define MAX_BIT_FRAME_SIZE  MAX_BYTE_FRAME_SIZE*8
-
 typedef struct Frame{
   size_t size = 0;
   uint8_t* data;
