@@ -17,7 +17,7 @@
 #define IN_T1(t) ((t > T1_LOW) && (t < T1_HIGH))
 #define IN_T2(t) ((t > T2_LOW) && (t < T2_HIGH))
 
-typedef union Data {
+typedef union u_Data {
   LEDBitmap bitmap;
   String string;
 } Data;
@@ -25,9 +25,8 @@ typedef union Data {
 class Reciever
 {
   public:
-    Reciever();
     Reciever(int frequency = 1000);
-    virtual ~Reciever() {   };
+    virtual ~Reciever(){};
 
   public: //methods
     void setPin(int pin) { _pin = pin; };
@@ -72,11 +71,11 @@ class Reciever
     bool _success;
     int _pin;
     unsigned long _lastTime;
-    struct LastReception {
+    struct s_LastReception {
       uint8_t type;
       Data data;
     } _lastReception;
-    struct CurrentReception {
+    struct s_CurrentReception {
       uint8_t type;
       uint8_t size[2];
     } _currentReception;

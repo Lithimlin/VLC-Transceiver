@@ -1,17 +1,6 @@
 #include <Arduino.h>
 #include <Transmitter.h>
 
-Transmitter::Transmitter()
-{
-  _pin = 0;
-  _pos = 0;
-  _manHalf = 0;
-  _busy = false;
-  _state = 0;
-  _active = false;
-  Timer2.initialize();
-}
-
 Transmitter::Transmitter(int frequency)
 {
   _pin = 0;
@@ -50,7 +39,7 @@ int Transmitter::sendData(LEDBitmap &image) {
   *         2 if no transmission pin has been specified.
   */
 int Transmitter::sendData(String &string) {
-  return _prepFrame(string)
+  return _prepFrame(string);
 }
 
 /**
@@ -80,8 +69,8 @@ int Transmitter::_prepFrame(LEDBitmap &image) {
     * 17 18 19 20 21 22 23 24   <-- 3rd octet
     * ...                           ...
     */
-  uint8_t img_size = image.getSize()
-  uint8_t size = img_size + 5;
+  uint16_t img_size = image.getSize();
+  uint16_t size = img_size + 5;
   uint8_t *frame = (uint8_t*)malloc(size*sizeof(uint8_t));
   uint8_t checksum = 0x00;
   //                                          v-- Just a little safety net
@@ -103,6 +92,15 @@ int Transmitter::_prepFrame(LEDBitmap &image) {
   frame[2] = img_size;
   frame[3] = image.getHeight();
   frame[size-1] = checksum;
+
+  #ifdef DEBUG
+  Serial.println("Built frame:");
+  for(uint16_t i = 0; i < size; i++) {
+    Serial.print(frame[i], HEX);
+  }
+  Serial.println();
+  #endif
+  
   _buildBitFrame(frame, size);
   // set the transmitter into busy mode so the idle pattern will no longer
   // be transmitted but instead the frame will be sent out.
@@ -132,9 +130,9 @@ int Transmitter::_prepFrame(String &string){
     *
     * up to 255 octets in the case of a string. One octet for each char in the string
     */
-  uint8_t str_size = string.length() + 1; //One more to also transmit the end character!
-  uint8_t size = str_size + 4;
-  uint8_t* frame = (uint8_t*)malloc(size*sizeof(uint8_t))
+  uint16_t str_size = string.length() + 1; //One more to also transmit the end character!
+  uint16_t size = str_size + 4;
+  uint8_t* frame = (uint8_t*)malloc(size*sizeof(uint8_t));
   uint8_t checksum = 0x00;
 
   for(uint8_t c = 0; c < str_size; c++){
@@ -147,6 +145,15 @@ int Transmitter::_prepFrame(String &string){
   frame[1] = 1; //type = 1 = string
   frame[2] = str_size;
   frame[size-1] = checksum;
+
+  #ifdef DEBUG
+  Serial.println("Built frame:");
+  for(uint16_t i = 0; i < size; i++) {
+    Serial.print(frame[i], HEX);
+  }
+  Serial.println();
+  #endif
+
   _buildBitFrame(frame, size);
   // set the transmitter into busy mode so the idle pattern will no longer
   // be transmitted but instead the frame will be sent out.
@@ -173,7 +180,7 @@ uint8_t Transmitter::_buildBitFrame(uint8_t* frame, uint8_t &size) {
     * Ex: 10100101 -> 0000001 00000000 00000001 00000000 00000000 00000001 00000000 000000001
     */
   _frame.size = size*8;
-  _frame.data = (uint8_t*)malloc(_frame.size*sizeof(uint8_t))
+  _frame.data = (uint8_t*)malloc(_frame.size*sizeof(uint8_t));
   uint8_t pos = 0;
     for (uint8_t byte = 0; byte < size; byte++) {
       for (uint8_t bit = 0; bit < 8; bit++) {

@@ -1,15 +1,10 @@
 #include <Transciever.h>
 
-Transciever::Transciever() {
-  _transmitter.setPin(TRANSMITTER_PIN);
-  _reciever.setPin(RECIEVER_PIN);
-}
-
 Transciever::Transciever(int frequency) {
   _transmitter.setPin(TRANSMITTER_PIN);
   _reciever.setPin(RECIEVER_PIN);
   _transmitter.setFrequency(frequency);
-  _reciever.setFrequency(frequency);  
+  _reciever.setFrequency(frequency);
 }
 
 void Transciever::startTransmitter() {

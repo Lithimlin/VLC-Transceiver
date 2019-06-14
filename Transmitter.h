@@ -17,7 +17,6 @@ typedef struct Frame{
 class Transmitter
 {
   public:
-    Transmitter();
     Transmitter(int frequency = 1000);
     virtual ~Transmitter() {  };
 

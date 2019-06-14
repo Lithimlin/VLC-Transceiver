@@ -12,7 +12,6 @@
 class Transciever
 {
   public:
-    Transciever();
     Transciever(int frequency = 1000);
     virtual ~Transciever() {   };
 
