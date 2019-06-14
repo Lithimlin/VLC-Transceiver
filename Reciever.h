@@ -20,6 +20,8 @@
 typedef union u_Data {
   LEDBitmap bitmap;
   String string;
+  u_Data() : bitmap(0,0) {};
+  ~u_Data() {bitmap.~LEDBitmap();};
 } Data;
 
 class Reciever
@@ -71,11 +73,11 @@ class Reciever
     bool _success;
     int _pin;
     unsigned long _lastTime;
-    struct s_LastReception {
+    struct LastReception {
       uint8_t type;
-      Data data;
+      Data data = {};
     } _lastReception;
-    struct s_CurrentReception {
+    struct CurrentReception {
       uint8_t type;
       uint8_t size[2];
     } _currentReception;
