@@ -13,22 +13,26 @@ const int MATRIX_PIN      = 2;
 const int RECIEVER_PIN    = 3;
 const int TRANSMITTER_PIN = 4;
 // SLC for LED Matrix: 13
-// DIN for LED Matrix: 12
+// DIN for LED Matrix: 11
 
-#define S2    7
-#define S3    8
-#define S4    9
-#define S5    10
-#define S6    A1
-#define BLUE  5
-#define RED   6
+#define B1                7
+#define B2                8
+#define B3                9
+#define B4                10
+#define LED_BLUE          5
+#define LED_RED           6
 
-const int BUTTON_UP       = S2;
-const int BUTTON_DOWN     = S4;
-const int BUTTON_LEFT     = S5;
-const int BUTTON_RIGHT    = S6;
-const int BUTTON_ENTER    = S3;
-const int LED_STATUS_1    = BLUE;
-const int LED_STATUS_2    = RED;
+const int BUTTON_1        = B1;
+const int BUTTON_2        = B2;
+const int BUTTON_3        = B3;
+const int BUTTON_4        = B4;
+
+const int YELLOW          = BUTTON_1;
+const int RED             = BUTTON_2;
+const int BLUE            = BUTTON_3;
+const int GREEN           = BUTTON_4;
+
+const int LED_STATUS_1    = LED_BLUE;
+const int LED_STATUS_2    = LED_RED;
 
 #endif
