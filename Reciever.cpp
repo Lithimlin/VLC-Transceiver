@@ -1,7 +1,7 @@
 #include <Reciever.h>
 
 Reciever::Reciever(int frequency) :
-  _transmit_period((1/frequency)*1000000),
+  _transmit_period((1.0/frequency)*1000000.0),
   _currentReception(),
   _lastReception(),
   _started(false),
@@ -49,7 +49,7 @@ int Reciever::setFrequency(int frequency) {
   if(_started) {
     return 1;
   }
-  _transmit_period = (1/frequency)*1000000; //(1/f)*10^6
+  _transmit_period = (1.0/frequency)*1000000.0; //(1/f)*10^6
   #ifdef DEBUG
   Serial.print("Frequency updated to "); Serial.print(frequency); Serial.println("Hz");
   Serial.print("Transmit Period updated to "); Serial.print(_transmit_period); Serial.println("µs");
@@ -82,6 +82,9 @@ void Reciever::switchState() {
         _value = digitalRead(_pin);
         pushValue(_value);
       } else {
+        #ifdef DEBUG
+        Serial.print("Measured time: "); Serial.print(t); Serial.println(" (idle)");
+        #endif
         handleError();
       }
       break;
@@ -99,6 +102,9 @@ void Reciever::switchState() {
         pushValue(_value);
         _recieving = true;
       } else {
+        #ifdef DEBUG
+        Serial.print("Measured time: "); Serial.print(t); Serial.println(" (start)");
+        #endif
         handleError();
         _state = State::RX_IDLE;
       }
@@ -125,6 +131,9 @@ void Reciever::switchState() {
       } else if(IN_T1(t)) {
         _state = State::RX_BIT_REPITITION1;
       } else {
+        #ifdef DEBUG
+        Serial.print("Measured time: "); Serial.print(t); Serial.println(" (alt)");
+        #endif
         handleError();
         _state = State::RX_IDLE;
       }
@@ -148,6 +157,9 @@ void Reciever::switchState() {
         }
       //if recorded period is 2T or anything else
       } else {
+        #ifdef DEBUG
+        Serial.print("Measured time: "); Serial.print(t); Serial.println(" (rep1)");
+        #endif
         handleError();
         _state = State::RX_IDLE;
       }
@@ -175,6 +187,9 @@ void Reciever::switchState() {
         }
       //if recorded period is 2T or anything else
       } else {
+        #ifdef DEBUG
+        Serial.print("Measured time: "); Serial.print(t); Serial.println(" (rep2)");
+        #endif
         handleError();
         _state = State::RX_IDLE;
       }
@@ -189,24 +204,44 @@ void Reciever::process(uint8_t value) {
   switch (_processState) {
     // if the preamble has not been checked yet...
     case ProcessState::FETCH_PREAMBLE:
+      #if DEBUG>1
+      Serial.println("Fetch preamble");
+      #endif
       checkPreamble(); // ...check it.
       break;
     // if the preamble was correct, fetch the data type...
     case ProcessState::FETCH_TYPE:
+      #if DEBUG>1
+      Serial.println("Fetch type");
+      #endif
       readType();
       break;
     // if the type has been fetched, fetch the size next...
     case ProcessState::FETCH_SIZE:
+      #if DEBUG>1
+      Serial.println("Fetch size");
+      #endif
       readSize();
       break;
     // if the size has been fetched, fetch the data...
     case ProcessState::FETCH_DATA:
+      #if DEBUG>1
+      Serial.println("Fetch data");
+      #endif
       // if all data has been recieved...
-      if(_recievedByteCtr == _currentReception.size[0]+1)
+      if(_recievedByteCtr == _currentReception.size[0]+1) {
+        #if DEBUG>1
+        Serial.print("Recieved "); Serial.print(_recievedByteCtr);
+        Serial.print(" data bytes (of "); Serial.print(_currentReception.size[0]+1); Serial.println(")");
+        #endif
         _processState = ProcessState::PROCESS_DATA; // ...go to the next step
+      }
       break;
     // if the data is complete...
     case ProcessState::PROCESS_DATA:
+      #if DEBUG>1
+      Serial.println("Process data");
+      #endif
       // ...check the checksum...
       if(checksumCorrect()) {
         _success = true;
@@ -242,7 +277,7 @@ void Reciever::process(uint8_t value) {
 
 void Reciever::pushValue(uint8_t value) {
   // if the _bitBuffer is full (holds an entire byte)...
-  #ifdef DEBUG
+  #if DEBUG>2
   Serial.print("Pushing value "); Serial.println(value, BIN);
   #endif
   if(!_bitBuffer.push(value)) {
@@ -264,7 +299,7 @@ void Reciever::pushValue(uint8_t value) {
     _recievedByteCtr++;
     //...and finally push the value
     _bitBuffer.push(value);
-    #ifdef DEBUG
+    #if DEBUG>2
     Serial.print("Repushing value "); Serial.println(value);
     #endif
   }
@@ -272,13 +307,10 @@ void Reciever::pushValue(uint8_t value) {
 }
 
 void Reciever::checkPreamble() {
-  #ifdef DEBUG
-  Serial.println("checkPreamble");
-  #endif
   //if the preamble has not been checked yet but an entire byte has been recieved...
   if (_recievedByteCtr == 1) {
     #ifdef DEBUG
-    Serial.println(" checking...");
+    Serial.println("Checking preamble");
     Serial.print("Recieved byte was "); Serial.println(_data[0], HEX);
     #endif
     //...check if it is the PREAMBLE...
@@ -300,7 +332,7 @@ void Reciever::checkPreamble() {
 }
 
 void Reciever::readType() {
-  #ifdef DBUG
+  #ifdef DEBUG
   Serial.println("Reading type");
   #endif
   //if there is an entire byte in the buffer...
@@ -308,7 +340,7 @@ void Reciever::readType() {
     //... read it and put it into the transmission...
     _currentReception.type = _data[0]; //1: string, 2: bitmap
     #ifdef DEBUG
-    Serial.print("Read type "); serial.println(_data[0]);
+    Serial.print("Read type "); Serial.println(_data[0]);
     #endif
     _processState = ProcessState::FETCH_SIZE;
     //... and reset the counter and data back to 0
@@ -318,9 +350,6 @@ void Reciever::readType() {
 }
 
 void Reciever::readSize() {
-  #ifdef DEBUG
-  Serial.println("Reading size");
-  #endif
   //distinguish between bitmap and string. Btimap has two sizes, string has one.
   switch (_currentReception.type) {
     case 1: //string
@@ -335,6 +364,7 @@ void Reciever::readSize() {
         //also reset the counter and data back to 0
         _recievedByteCtr = 0;
         _data[0] = 0;
+        _processState = ProcessState::FETCH_DATA;
       }
       break;
     case 2: //bitmap
@@ -345,12 +375,13 @@ void Reciever::readSize() {
         _currentReception.size[1] = _data[1];
         #ifdef DEBUG
         Serial.print("Image size: "); Serial.print(_data[0]);
-        Serial.print("Image height: "); Serial.println(_data[1]);
+        Serial.print("\tImage height: "); Serial.println(_data[1]);
         #endif
         //... and reset the counter and data back to 0
         _recievedByteCtr = 0;
         _data[0] = 0;
         _data[1] = 0;
+        _processState = ProcessState::FETCH_DATA;
       }
   }
 }
@@ -366,7 +397,7 @@ bool Reciever::checksumCorrect() {
   }
   #ifdef DEBUG
   Serial.print("Own Checksum: "); Serial.print(recievedChecksum, HEX);
-  Serial.print("Sent Checksum: "); Serial.println(_data[_currentReception.size[0]], HEX);
+  Serial.print("\tSent Checksum: "); Serial.println(_data[_currentReception.size[0]], HEX);
   #endif
   return (recievedChecksum == _data[_currentReception.size[0]]);
 }
@@ -374,8 +405,8 @@ bool Reciever::checksumCorrect() {
 //TODO!!!! ----------------------------------------- !!!!! --------------------------------
 void Reciever::buildImage() {
   _lastReception.type = 2;
-  uint8_t size = _currentReception.size[0];
-  uint8_t height = _currentReception.size[1];
+  uint8_t height = _currentReception.size[0];
+  uint8_t size = _currentReception.size[1];
   uint8_t width = size / height;
   _lastReception.data.bitmap = LEDBitmap(width, height);
 
@@ -404,9 +435,6 @@ void Reciever::handleError() {
 }
 
 void Reciever::clear() {
-  #ifdef DEBUG
-  Serial.println("Clearing...")
-  #endif
   _processState = ProcessState::FETCH_PREAMBLE;
   _success = false;
   _bitBuffer.flush();
