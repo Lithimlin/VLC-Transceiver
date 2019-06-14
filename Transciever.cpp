@@ -1,6 +1,9 @@
 #include <Transciever.h>
 
-Transciever::Transciever(int frequency) {
+Transciever::Transciever(int frequency) :
+  _transmitter(frequency),
+  _reciever(frequency)
+{
   _transmitter.setPin(TRANSMITTER_PIN);
   _reciever.setPin(RECIEVER_PIN);
   _transmitter.setFrequency(frequency);
@@ -23,8 +26,12 @@ void Transciever::stopReciever() {
   _reciever.stop();
 }
 
-int Transciever::sendData(LEDBitmap image) {
+int Transciever::sendData(LEDBitmap &image) {
   return _transmitter.sendData(image);
+}
+
+int Transciever::sendData(String &string) {
+  return _transmitter.sendData(string);
 }
 
 bool Transciever::lastTransmissionComplete() {
@@ -53,4 +60,12 @@ bool Transciever::receptionSuccessful() {
 
 LEDBitmap Transciever::getImage() {
   return _reciever.getImage();
+}
+
+String Transciever::getString() {
+  return _reciever.getString();
+}
+
+int Transciever::getType() {
+  return _reciever.getType();
 }

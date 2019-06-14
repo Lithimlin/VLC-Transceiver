@@ -20,7 +20,8 @@ class Transciever
     void stopTransmitter();
     void startReciever();
     void stopReciever();
-    int sendData(LEDBitmap image);
+    int sendData(LEDBitmap &image);
+    int sendData(String &string);
     bool lastTransmissionComplete();
     bool transmitterIsStarted();
     bool recieverIsStarted();
@@ -28,6 +29,8 @@ class Transciever
     bool hadRecieverError();
     bool receptionSuccessful();
     LEDBitmap getImage();
+    String getString();
+    int getType();
 
   private: //members
     Transmitter _transmitter;
