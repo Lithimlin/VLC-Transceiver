@@ -25,6 +25,9 @@ Transmitter* Transmitter::_instance;
   *         2 if no transmission pin has been specified.
   */
 int Transmitter::sendData(LEDBitmap &image) {
+  #ifdef DEBUG
+  Serial.println("Sending image...");
+  #endif
   return _prepFrame(image);
 }
 
@@ -39,6 +42,9 @@ int Transmitter::sendData(LEDBitmap &image) {
   *         2 if no transmission pin has been specified.
   */
 int Transmitter::sendData(String &string) {
+  #ifdef DEBUG
+  Serial.println("Sending string...");
+  #endif
   return _prepFrame(string);
 }
 
@@ -69,12 +75,18 @@ int Transmitter::_prepFrame(LEDBitmap &image) {
     * 17 18 19 20 21 22 23 24   <-- 3rd octet
     * ...                           ...
     */
-  uint16_t img_size = image.getSize();
-  uint16_t size = img_size + 5;
-  uint8_t *frame = (uint8_t*)malloc(size*sizeof(uint8_t));
+  uint8_t img_size = image.getSize();
+  uint8_t img_height = image.getHeight();
+  uint8_t size = img_height + 5;
+  #ifdef DEBUG
+  Serial.print("Image size: "); Serial.print(img_size);
+  Serial.print("\tImage height: "); Serial.print(img_height);
+  Serial.print("\tFrame size: "); Serial.println(size);
+  #endif
+  uint8_t *frame = (uint8_t*)calloc(size, sizeof(uint8_t));
   uint8_t checksum = 0x00;
   //                                          v-- Just a little safety net
-  for(uint8_t h = 0; (h < image.getHeight()) && (h < 8); h++) {
+  for(uint8_t h = 0; (h < img_height) && (h < 8); h++) {
     uint8_t value = image.getBitmap()[h];
     checksum = (checksum + value) % 256;
     frame[h+4] = value;
@@ -89,18 +101,18 @@ int Transmitter::_prepFrame(LEDBitmap &image) {
   // building the frame
   frame[0] = PREAMBLE;
   frame[1] = 2; // type = 2 = bitmap
-  frame[2] = img_size;
-  frame[3] = image.getHeight();
+  frame[2] = img_height;
+  frame[3] = img_size;
   frame[size-1] = checksum;
 
   #ifdef DEBUG
   Serial.println("Built frame:");
-  for(uint16_t i = 0; i < size; i++) {
-    Serial.print(frame[i], HEX);
+  for(uint8_t i = 0; i < size; i++) {
+    Serial.print(frame[i], HEX); Serial.print(" ");
   }
   Serial.println();
   #endif
-  
+
   _buildBitFrame(frame, size);
   // set the transmitter into busy mode so the idle pattern will no longer
   // be transmitted but instead the frame will be sent out.
@@ -130,9 +142,13 @@ int Transmitter::_prepFrame(String &string){
     *
     * up to 255 octets in the case of a string. One octet for each char in the string
     */
-  uint16_t str_size = string.length() + 1; //One more to also transmit the end character!
-  uint16_t size = str_size + 4;
-  uint8_t* frame = (uint8_t*)malloc(size*sizeof(uint8_t));
+  uint8_t str_size = string.length() + 1; //One more to also transmit the end character!
+  uint8_t size = str_size + 4;
+  #ifdef DEBUG
+  Serial.print("String size: "); Serial.print(str_size);
+  Serial.print("\tFrame size: "); Serial.println(size);
+  #endif
+  uint8_t* frame = (uint8_t*)calloc(size, sizeof(uint8_t));
   uint8_t checksum = 0x00;
 
   for(uint8_t c = 0; c < str_size; c++){
@@ -149,7 +165,7 @@ int Transmitter::_prepFrame(String &string){
   #ifdef DEBUG
   Serial.println("Built frame:");
   for(uint16_t i = 0; i < size; i++) {
-    Serial.print(frame[i], HEX);
+    Serial.print(frame[i], HEX); Serial.print(" ");
   }
   Serial.println();
   #endif
@@ -231,11 +247,17 @@ void Transmitter::start() {
   _instance = this;
   Timer2.attachInterrupt(_transmitBit);
   _active = true;
+  #ifdef DEBUG
+  Serial.println("Transmitter started!");
+  #endif
 }
 
 void Transmitter::stop() {
   Timer2.detachInterrupt();
   _active = false;
+  #ifdef DEBUG
+  Serial.println("Transmitter stopped!");
+  #endif
 }
 
 int Transmitter::setFrequency(int frequency) {
