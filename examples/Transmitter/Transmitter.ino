@@ -1,4 +1,4 @@
-#include <Timer.h> // Die Timer Bibilothek mit einbinden
+#include <Timer.h> // Die Timer Bibilothek mit einbinden (Timer 2.1)
 
 #include <Constants.h>
 #include <LEDBitmap.h>
@@ -18,8 +18,12 @@ int data[] = {1, 1, 1, 0, 0, 1, 1, 1,
               0, 1, 1, 1, 0, 1, 0, 0};
 // Mit dem Datenarray ein Bild initialisieren
 LEDBitmap image(8, 8, data);
+// Einen String anlegen
+String string = "Hello World!";
 // Einen Timer initialisieren
 Timer t;
+// Einen Boolean anlegen, um zwischen dem Bild und dem String zu wechseln
+bool sendImage = true;
 
 void setup() {
   // Die serielle Kommunikation mit dem Display starten
@@ -36,8 +40,13 @@ void loop() {
 }
 
 void sendData(void){
-  // Das vorher initialisierte Bild senden 
-  transciever.sendData(image);
+  if(sendImage) { // Wenn gerade das Bild gesendet werden soll...
+    //... sende das vorher initialisierte Bild
+    transciever.sendData(image);
+  } else { // Ansonsten...
+    //... sende den vorher initialisierten String
+    transciever.sendData(string);
+  }
+  // Wechsle den Status
+  sendImage = !sendImage;
 }
-
-
