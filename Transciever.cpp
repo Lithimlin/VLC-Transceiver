@@ -26,6 +26,20 @@ void Transciever::stopReciever() {
   _reciever.stop();
 }
 
+int Transciever::setFrequencies(int frequency) {
+  frequency = _transmitter.setFrequency(frequency);
+  _reciever.setFrequency(frequency);
+  return frequency;
+}
+
+int Transciever::setTransmitFrequency(int frequency) {
+  return _transmitter.setFrequency(frequency);
+}
+
+int Transciever::setRecieveFrequency(int frequency) {
+  return _reciever.setFrequency(frequency);
+}
+
 int Transciever::sendData(LEDBitmap &image) {
   return _transmitter.sendData(image);
 }

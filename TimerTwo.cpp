@@ -6,7 +6,7 @@ ISR(TIMER2_COMPA_vect) {    //ISR on Compare Match A
   Timer2.isrCallback();
 }
 
-void TimerTwo::initialize(int frequency) {
+int TimerTwo::initialize(int frequency) {
   /** Prescalers:
     * http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf#G3.1197678
     * Prescaler 32 : CS21, CS20
@@ -27,22 +27,27 @@ void TimerTwo::initialize(int frequency) {
       prescaler |= _BV(CS22);
       prescaler |= _BV(CS20);
       value = 249;
+      frequency = 500;
     } break;
     case 1000: { //1kHz
       prescaler |= _BV(CS22);
       value = 249;
+      frequency = 1000;
     } break;
     case 2000: { //2kHz
       prescaler |= _BV(CS22);
       value = 124;
+      frequency = 2000;
     } break;
     /*case 4000: { //4kHz
       prescaler |= _BV(CS21) |= _BV(CS20);
       value = 124;
+      frequency = 4000;
     } break;*/ //Currently not usable as the filter controller is too slow
     default: { //1kHz
       prescaler |= _BV(CS22);
       value = 249;
+      frequency = 1000;
     } break;
   }
 
@@ -55,6 +60,8 @@ void TimerTwo::initialize(int frequency) {
   TCCR2B  |=  prescaler;    // set correct bits for needed prescaler
   OCR2A    =  value;        // set the needed time value
   sei();
+  
+  return frequency;
 }
 
 void TimerTwo::attachInterrupt(void (*isr)()) {

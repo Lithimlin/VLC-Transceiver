@@ -262,10 +262,9 @@ void Transmitter::stop() {
 
 int Transmitter::setFrequency(int frequency) {
   if(_active) {
-    return 1;
+    return -1;
   }
-  Timer2.initialize(frequency);
-  return 0;
+  return Timer2.initialize(frequency);
 }
 
 static void Transmitter::_transmitBit() {

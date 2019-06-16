@@ -6,7 +6,7 @@
 class TimerTwo
 {
   public: //methods
-    void initialize(int frequency = 1000);
+    int initialize(int frequency = 1000);
     void attachInterrupt(void (*isr)());
     void detachInterrupt();
     void (*isrCallback)();

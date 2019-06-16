@@ -20,6 +20,9 @@ class Transciever
     void stopTransmitter();
     void startReciever();
     void stopReciever();
+    int setFrequencies(int frequency = 1000);
+    int setTransmitFrequency(int frequency = 1000);
+    int setRecieveFrequency(int frequency = 1000);
     int sendData(LEDBitmap &image);
     int sendData(String &string);
     bool lastTransmissionComplete();
