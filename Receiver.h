@@ -7,7 +7,7 @@
 
 #define T1 _transmit_period
 #define T2 T1*2
-#define TOLERANCE T1*REceive_TOLERANCE
+#define TOLERANCE T1*RECEIVE_TOLERANCE
 
 #define T1_LOW (T1 - TOLERANCE)
 #define T1_HIGH (T1 + TOLERANCE)
