@@ -5,7 +5,7 @@ Transceiver::Transceiver(int frequency) :
   _receiver(frequency)
 {
   _transmitter.setPin(TRANSMITTER_PIN);
-  _receiver.setPin(RECIEVER_PIN);
+  _receiver.setPin(RECEIVER_PIN);
   _transmitter.setFrequency(frequency);
   _receiver.setFrequency(frequency);
 }

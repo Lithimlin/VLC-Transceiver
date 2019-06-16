@@ -10,7 +10,7 @@
 #define RECEIVE_TOLERANCE   (0.40)  //tolerance for the Receiver time measurement (between 0..1)
 
 const int MATRIX_PIN      = 2;
-const int RECIEVER_PIN    = 3;
+const int RECEIVER_PIN    = 3;
 const int TRANSMITTER_PIN = 4;
 
 // SLC for LED Matrix: 13
