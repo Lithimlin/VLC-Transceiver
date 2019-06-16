@@ -1,71 +1,74 @@
 #include <Timer.h>
 
-#include <SPI.h>
-#include <Adafruit_GFX.h>
 #include <Max72xxPanel.h>
 
 #include <Constants.h>
 #include <LEDBitmap.h>
 
-// Das Display auf dem Matrix Pin mit einer Höhe und Breite von je einem Display initialisieren
-Max72xxPanel matrix = Max72xxPanel(MATRIX_PIN, 1, 1);
+// Das Display auf dem Matrix Pin initialisieren
+Max72xxPanel matrix = Max72xxPanel(MATRIX_PIN);
 
 void setup() {
   // Stelle die Buttons als Eingang ein
-  pinMode(BUTTON_DOWN, INPUT);
-  pinMode(BUTTON_UP, INPUT);
-  pinMode(BUTTON_LEFT, INPUT);
-  pinMode(BUTTON_RIGHT, INPUT);
-  pinMode(BUTTON_ENTER, INPUT);
+  pinMode(YELLOW, INPUT);
+  pinMode(RED, INPUT);
+  pinMode(BLUE, INPUT);
+  //pinMode(GREEN, INPUT);
+  
   // Stelle die LEDs als Ausgang ein
-  pinMode(LED_STATUS_1, OUTPUT);
-  pinMode(LED_STATUS_2, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  
   // Serielle Kommunikation mit dem Display starten
-  Serial.begin(2000000);
+  Serial.begin(9600);
+  
   // Das Display konfigurieren
-  matrix.setIntensity(8);
-  matrix.setRotation(0, 3);
+  matrix.setRotation(0, 2);
   // Das Display leeren
   matrix.fillScreen(LOW);
   matrix.write();
+  
   // Die LEDs kurz blinken lassen
-  digitalWrite(BLUE, HIGH);
+  digitalWrite(LED_BLUE, HIGH);
+  Serial.println("LED Blue");
   delay(500); // mit einer halben Sekunde Verzögerung
-  digitalWrite(BLUE, LOW);
-  digitalWrite(RED, HIGH);
+  digitalWrite(LED_BLUE, LOW);
+  digitalWrite(LED_RED, HIGH);
+  Serial.println("LED Red");
   delay(500);
-  digitalWrite(RED, LOW);
+  digitalWrite(LED_RED, LOW);
+  
+  matrix.drawChar(1, 0, '0', HIGH, LOW, 1);
+  matrix.write();
 }
 
 void loop() {
-  // Gebe auf dem Display ein "D" aus, wenn "RUNTER" gedrückt wird
-  if(digitalRead(BUTTON_DOWN) == HIGH) {
+  // Gebe auf dem Display ein "Y" aus, wenn gelb gedrückt wird
+  if(digitalRead(YELLOW)) {
     matrix.fillScreen(LOW);
-    matrix.drawChar(1, 0, 'D', HIGH, LOW, 1);
+    matrix.drawChar(1, 0, 'Y', HIGH, LOW, 1);
     matrix.write();
+    Serial.println("Yellow");
   }
-  // Gebe auf dem Display ein "U" aus, wenn "HOCH" gedrückt wird
-  else if(digitalRead(BUTTON_UP) == HIGH) {
-    matrix.fillScreen(LOW);
-    matrix.drawChar(1, 0, 'U', HIGH, LOW, 1);
-    matrix.write();
-  }
-  // Gebe auf dem Display ein "L" aus, wenn "LINKS" gedrückt wird
-  else if(digitalRead(BUTTON_LEFT) == HIGH) {
-    matrix.fillScreen(LOW);
-    matrix.drawChar(1, 0, 'L', HIGH, LOW, 1);
-    matrix.write();
-  }
-  // Gebe auf dem Display ein "R" aus, wenn "RECHTS" gedrückt wird
-  else if(digitalRead(BUTTON_RIGHT) == HIGH) {
+  // Gebe auf dem Display ein "R" aus, wenn rot gedrückt wird
+  else if(digitalRead(RED)) {
     matrix.fillScreen(LOW);
     matrix.drawChar(1, 0, 'R', HIGH, LOW, 1);
     matrix.write();
+    Serial.println("Red");
   }
-  // Gebe auf dem Display ein "E" aus, wenn "ENTER" gedrückt wird
-  else if(digitalRead(BUTTON_ENTER) == HIGH) {
+  // Gebe auf dem Display ein "B" aus, wenn blau gedrückt wird
+  else if(digitalRead(BLUE)) {
     matrix.fillScreen(LOW);
-    matrix.drawChar(1, 0, 'E', HIGH, LOW, 1);
+    matrix.drawChar(1, 0, 'B', HIGH, LOW, 1);
     matrix.write();
-  }
+    Serial.println("Blue");
+  }/*
+  // Gebe auf dem Display ein "G" aus, wenn grün gedrückt wird
+  else if(digitalRead(GREEN)) {
+    matrix.fillScreen(LOW);
+    matrix.drawChar(1, 0, 'G', HIGH, LOW, 1);
+    matrix.write();
+    Serial.println("Green");
+  }*/
 }

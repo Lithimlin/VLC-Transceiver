@@ -1,5 +1,5 @@
-#ifndef RECIEVER_H
-#define RECIEVER_H
+#ifndef RECEIVER_H
+#define RECEIVER_H
 #include <Arduino.h>
 #include "SimpleFIFO.h"
 #include "LEDBitmap.h"
@@ -7,7 +7,7 @@
 
 #define T1 _transmit_period
 #define T2 T1*2
-#define TOLERANCE T1*RECIEVE_TOLERANCE
+#define TOLERANCE T1*REceive_TOLERANCE
 
 #define T1_LOW (T1 - TOLERANCE)
 #define T1_HIGH (T1 + TOLERANCE)
@@ -24,11 +24,11 @@ typedef union u_Data {
   ~u_Data() {bitmap.~LEDBitmap();};
 } Data;
 
-class Reciever
+class Receiver
 {
   public:
-    Reciever(int frequency = 1000);
-    virtual ~Reciever(){};
+    Receiver(int frequency = 1000);
+    virtual ~Receiver(){};
 
   public: //methods
     void setPin(int pin) { _pin = pin; };
@@ -82,12 +82,12 @@ class Reciever
       uint8_t size[2];
     } _currentReception;
     uint8_t _data[260];
-    uint16_t _recievedByteCtr;
+    uint16_t _receivedByteCtr;
     uint8_t _value;
     SimpleFIFO _bitBuffer;
     State _state;
     ProcessState _processState;
-    static Reciever* _instance = nullptr;
+    static Receiver* _instance = nullptr;
 
     void process(uint8_t value);
     void pushValue(uint8_t value);

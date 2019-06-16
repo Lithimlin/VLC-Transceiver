@@ -1,6 +1,6 @@
-#include <Reciever.h>
+#include <Receiver.h>
 
-Reciever::Reciever(int frequency) :
+Receiver::Receiver(int frequency) :
   _transmit_period((1.0/frequency)*1000000.0),
   _currentReception(),
   _lastReception(),
@@ -13,39 +13,39 @@ Reciever::Reciever(int frequency) :
   _lastTime = micros();
   clear();
   #ifdef DEBUG
-  Serial.println("\n---\nReciever initialized.");
+  Serial.println("\n---\nReceiver initialized.");
   Serial.print(" Frequency is "); Serial.print(frequency); Serial.println("Hz");
   Serial.print(" Transmit Period is "); Serial.print(_transmit_period); Serial.println("µs");
   Serial.println("---\n");
   #endif
 }
 
-Reciever* Reciever::_instance;
+Receiver* Receiver::_instance;
 
-void Reciever::start() {
+void Receiver::start() {
   if(_pin != 0) {
     _instance = this;
     attachInterrupt(digitalPinToInterrupt(_pin), _switchState, CHANGE);
     _started = true;
     #ifdef DEBUG
-    Serial.println("Reciever started!");
+    Serial.println("Receiver started!");
     #endif
   }
 }
 
-static void Reciever::_switchState() {
+static void Receiver::_switchState() {
   _instance->switchState();
 }
 
-void Reciever::stop() {
+void Receiver::stop() {
   detachInterrupt(digitalPinToInterrupt(_pin));
   _started = false;
   #ifdef DEBUG
-  Serial.println("Reciever stopped!");
+  Serial.println("Receiver stopped!");
   #endif
 }
 
-int Reciever::setFrequency(int frequency) {
+int Receiver::setFrequency(int frequency) {
   if(_started) {
     return 1;
   }
@@ -57,19 +57,19 @@ int Reciever::setFrequency(int frequency) {
   return 0;
 }
 
-bool Reciever::hadError() {
+bool Receiver::hadError() {
   bool tmp = _hadError;
   _hadError = false;
   return tmp;
 }
 
-bool Reciever::receptionSuccessful() {
+bool Receiver::receptionSuccessful() {
   bool tmp = _success;
   _success = false;
   return tmp;
 }
 
-void Reciever::switchState() {
+void Receiver::switchState() {
   unsigned long t = micros() - _lastTime;
   _lastTime = micros();
   switch (_state) {
@@ -198,7 +198,7 @@ void Reciever::switchState() {
 
 // -------------------------------------------------------------------------- //
 
-void Reciever::process(uint8_t value) {
+void Receiver::process(uint8_t value) {
   //Serial.println("In process...");
   pushValue(value);
   switch (_processState) {
@@ -228,10 +228,10 @@ void Reciever::process(uint8_t value) {
       #if DEBUG>1
       Serial.println("Fetch data");
       #endif
-      // if all data has been recieved...
-      if(_recievedByteCtr == _currentReception.size[0]+1) {
+      // if all data has been received...
+      if(_receivedByteCtr == _currentReception.size[0]+1) {
         #if DEBUG>1
-        Serial.print("Recieved "); Serial.print(_recievedByteCtr);
+        Serial.print("Received "); Serial.print(_receivedByteCtr);
         Serial.print(" data bytes (of "); Serial.print(_currentReception.size[0]+1); Serial.println(")");
         #endif
         _processState = ProcessState::PROCESS_DATA; // ...go to the next step
@@ -275,7 +275,7 @@ void Reciever::process(uint8_t value) {
   // the reception is completed and was successful
 }
 
-void Reciever::pushValue(uint8_t value) {
+void Receiver::pushValue(uint8_t value) {
   // if the _bitBuffer is full (holds an entire byte)...
   #if DEBUG>2
   Serial.print("Pushing value "); Serial.println(value, BIN);
@@ -294,24 +294,24 @@ void Reciever::pushValue(uint8_t value) {
     Serial.print("Read "); Serial.print(byte, HEX); Serial.println(" from buffer");
     #endif
     //...save byte in the _data array...
-    _data[_recievedByteCtr] = byte;
+    _data[_receivedByteCtr] = byte;
 
-    _recievedByteCtr++;
+    _receivedByteCtr++;
     //...and finally push the value
     _bitBuffer.push(value);
     #if DEBUG>2
     Serial.print("Repushing value "); Serial.println(value);
     #endif
   }
-  //increases the _recievedByteCtr if an entire byte has been recieved.
+  //increases the _receivedByteCtr if an entire byte has been received.
 }
 
-void Reciever::checkPreamble() {
-  //if the preamble has not been checked yet but an entire byte has been recieved...
-  if (_recievedByteCtr == 1) {
+void Receiver::checkPreamble() {
+  //if the preamble has not been checked yet but an entire byte has been received...
+  if (_receivedByteCtr == 1) {
     #ifdef DEBUG
     Serial.println("Checking preamble");
-    Serial.print("Recieved byte was "); Serial.println(_data[0], HEX);
+    Serial.print("Received byte was "); Serial.println(_data[0], HEX);
     #endif
     //...check if it is the PREAMBLE...
     if (_data[0] == PREAMBLE) {
@@ -326,17 +326,17 @@ void Reciever::checkPreamble() {
       _processState = ProcessState::ERROR;
     }
     //...and put the counter and data back to 0
-    _recievedByteCtr = 0;
+    _receivedByteCtr = 0;
     _data[0] = 0;
   }
 }
 
-void Reciever::readType() {
+void Receiver::readType() {
   #ifdef DEBUG
   Serial.println("Reading type");
   #endif
   //if there is an entire byte in the buffer...
-  if (_recievedByteCtr == 1) {
+  if (_receivedByteCtr == 1) {
     //... read it and put it into the transmission...
     _currentReception.type = _data[0]; //1: string, 2: bitmap
     #ifdef DEBUG
@@ -344,17 +344,17 @@ void Reciever::readType() {
     #endif
     _processState = ProcessState::FETCH_SIZE;
     //... and reset the counter and data back to 0
-    _recievedByteCtr = 0;
+    _receivedByteCtr = 0;
     _data[0] = 0;
   }
 }
 
-void Reciever::readSize() {
+void Receiver::readSize() {
   //distinguish between bitmap and string. Btimap has two sizes, string has one.
   switch (_currentReception.type) {
     case 1: //string
       //if the single size byte has been received...
-      if(_recievedByteCtr == 1) {
+      if(_receivedByteCtr == 1) {
         //... read it to the first position of _dataSize...
         _currentReception.size[0] = _data[0];
         _currentReception.size[1] = 0; //... and clear the second position just to be safe
@@ -362,14 +362,14 @@ void Reciever::readSize() {
         Serial.print("String size: "); Serial.println(_data[0]);
         #endif
         //also reset the counter and data back to 0
-        _recievedByteCtr = 0;
+        _receivedByteCtr = 0;
         _data[0] = 0;
         _processState = ProcessState::FETCH_DATA;
       }
       break;
     case 2: //bitmap
       //if the two size bytes have been received...
-      if(_recievedByteCtr == 2) {
+      if(_receivedByteCtr == 2) {
         //... read them into _dataSize...
         _currentReception.size[0] = _data[0];
         _currentReception.size[1] = _data[1];
@@ -378,7 +378,7 @@ void Reciever::readSize() {
         Serial.print("\tImage height: "); Serial.println(_data[1]);
         #endif
         //... and reset the counter and data back to 0
-        _recievedByteCtr = 0;
+        _receivedByteCtr = 0;
         _data[0] = 0;
         _data[1] = 0;
         _processState = ProcessState::FETCH_DATA;
@@ -386,24 +386,24 @@ void Reciever::readSize() {
   }
 }
 
-bool Reciever::checksumCorrect() {
+bool Receiver::checksumCorrect() {
   #ifdef DEBUG
   Serial.println("Checking checksum");
   #endif
-  uint8_t recievedChecksum = 0;
+  uint8_t receivedChecksum = 0;
   for (uint8_t i = 0; i < _currentReception.size[0]; i++) {
-    recievedChecksum += _data[i];
-    recievedChecksum %= 256;
+    receivedChecksum += _data[i];
+    receivedChecksum %= 256;
   }
   #ifdef DEBUG
-  Serial.print("Own Checksum: "); Serial.print(recievedChecksum, HEX);
+  Serial.print("Own Checksum: "); Serial.print(receivedChecksum, HEX);
   Serial.print("\tSent Checksum: "); Serial.println(_data[_currentReception.size[0]], HEX);
   #endif
-  return (recievedChecksum == _data[_currentReception.size[0]]);
+  return (receivedChecksum == _data[_currentReception.size[0]]);
 }
 
 //TODO!!!! ----------------------------------------- !!!!! --------------------------------
-void Reciever::buildImage() {
+void Receiver::buildImage() {
   _lastReception.type = 2;
   uint8_t height = _currentReception.size[0];
   uint8_t size = _currentReception.size[1];
@@ -418,7 +418,7 @@ void Reciever::buildImage() {
   _lastReception.data.bitmap.buildFromBytemap(map);
 }
 
-void Reciever::buildString() {
+void Receiver::buildString() {
   _lastReception.type = 1;
   _lastReception.data.string = _data; // This SHOULD work
   #ifdef DEBUG
@@ -426,7 +426,7 @@ void Reciever::buildString() {
   #endif
 }
 
-void Reciever::handleError() {
+void Receiver::handleError() {
   #ifdef DEBUG
   Serial.println("Error detected");
   #endif
@@ -434,28 +434,28 @@ void Reciever::handleError() {
   clear();
 }
 
-void Reciever::clear() {
+void Receiver::clear() {
   _processState = ProcessState::FETCH_PREAMBLE;
   _success = false;
   _bitBuffer.flush();
-  _recievedByteCtr = 0;
+  _receivedByteCtr = 0;
   _recieving = false;
 }
 
-LEDBitmap Reciever::getImage() {
+LEDBitmap Receiver::getImage() {
   if(_lastReception.type==2)
     return _lastReception.data.bitmap;
   else
     return LEDBitmap(0, 0);
 }
 
-String Reciever::getString() {
+String Receiver::getString() {
   if(_lastReception.type==1)
     return _lastReception.data.string;
   else
     return String("");
 }
 
-int Reciever::getType() {
+int Receiver::getType() {
   return _lastReception.type;
 }

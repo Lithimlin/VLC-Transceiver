@@ -1,35 +1,35 @@
-#ifndef TRANSCIEVER_H
-#define TRANSCIEVER_H
+#ifndef TRANSCEIVER_H
+#define TRANSCEIVER_H
 
 #include <Arduino.h>
 
 #include "Transmitter.h"
-#include "Reciever.h"
+#include "Receiver.h"
 #include "LEDBitmap.h"
 #include "Constants.h"
 
 
-class Transciever
+class Transceiver
 {
   public:
-    Transciever(int frequency = 1000);
-    virtual ~Transciever() {   };
+    Transceiver(int frequency = 1000);
+    virtual ~Transceiver() {   };
 
   public: //methods
     void startTransmitter();
     void stopTransmitter();
-    void startReciever();
-    void stopReciever();
+    void startReceiver();
+    void stopReceiver();
     int setFrequencies(int frequency = 1000);
     int setTransmitFrequency(int frequency = 1000);
-    int setRecieveFrequency(int frequency = 1000);
+    int setReceiveFrequency(int frequency = 1000);
     int sendData(LEDBitmap &image);
     int sendData(String &string);
     bool lastTransmissionComplete();
     bool transmitterIsStarted();
-    bool recieverIsStarted();
+    bool receiverIsStarted();
     bool isRecieving();
-    bool hadRecieverError();
+    bool hadReceiverError();
     bool receptionSuccessful();
     LEDBitmap getImage();
     String getString();
@@ -37,7 +37,7 @@ class Transciever
 
   private: //members
     Transmitter _transmitter;
-    Reciever _reciever;
+    Receiver _receiver;
 };
 
 #endif
