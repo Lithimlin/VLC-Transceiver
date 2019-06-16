@@ -1,12 +1,12 @@
 #######################################
-# Syntax Coloring Map For VLC-Transciever
+# Syntax Coloring Map For VLC-Transceiver
 #######################################
 
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
 
-Transciever	              KEYWORD1
+Transceiver	              KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -14,14 +14,14 @@ Transciever	              KEYWORD1
 
 startTransmitter					KEYWORD2
 stopTransmitter						KEYWORD2
-startReciever							KEYWORD2
-stopReciever							KEYWORD2
+startReceiver							KEYWORD2
+stopReceiver							KEYWORD2
 sendData									KEYWORD2
 lastTransmissionComplete	KEYWORD2
 transmitterIsStarted			KEYWORD2
-recieverIsStarted					KEYWORD2
+receiverIsStarted					KEYWORD2
 isRecieving								KEYWORD2
-hadRecieverError					KEYWORD2
+hadReceiverError					KEYWORD2
 receptionSuccessful				KEYWORD2
 getImage									KEYWORD2
 getBitmap                 KEYWORD2
