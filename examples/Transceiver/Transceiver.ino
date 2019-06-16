@@ -3,7 +3,7 @@
 #include <Max72xxPanel.h>
 
 #include <Constants.h>
-#include <Transciever.h>
+#include <Transceiver.h>
 #include <LEDBitmap.h>
 
 int data[] = {1, 1, 1, 0, 0, 1, 1, 1,
@@ -16,43 +16,74 @@ int data[] = {1, 1, 1, 0, 0, 1, 1, 1,
               0, 1, 1, 1, 0, 1, 0, 0};
 // Mit dem Datenarray ein Bild initialisieren
 LEDBitmap image(8, 8, data);
+// Einen String anlegen
+String string("Hello VLC!");
 
-// Das Display auf dem Matrix Pin mit einer Höhe und Breite von je einem Display initialisieren
-Max72xxPanel matrix = Max72xxPanel(MATRIX_PIN, 1, 1);
+// Das Display auf dem Matrix Pin initialisieren
+Max72xxPanel matrix = Max72xxPanel(MATRIX_PIN);
 // Den Transmitter initialisieren
-Transciever transciever;
+Transceiver transceiver;
 // Eine Variable für die letzte Empfangszeit initialisieren
 long lastReception;
 
 void setup() {
   // Serielle Kommunikation mit dem Display starten
   Serial.begin(9600);
+
+  // Pins initialisieren
+  pinMode(RED, INPUT);
+  pinMode(BLUE, INPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+  digitalWrite(LED_BLUE, LOW);
+  digitalWrite(LED_RED, LOW);
+
   // Das Display konfigurieren
-  matrix.setIntensity(5);
-  matrix.setRotation(0, 3);
+  matrix.setRotation(0, 2);
   // Das Display leeren
   matrix.fillScreen(LOW);
   matrix.write();
-  // Den Reciever starten
-  transciever.startReciever();
-  transciever.startTransmitter();
+  // Den Receiver und Transmitter starten
+  transceiver.startReceiver();
+  transceiver.startTransmitter();
 
   lastReception = millis(); //Den Startwert für die letzte Empfangszeit auf den Einschaltzeitpunkt legen
 }
 
 void loop() {
   // Wenn ein Bild erfolgreich empfangen wurde...
-  if(transciever.receptionSuccessful()) {
+  if(transceiver.receptionSuccessful()) {
     lastReception = millis(); //... speichere die Zeit,...
-    matrix.fillScreen(LOW); //... leere das Display...
-    matrix.drawBitmap(0, 0, transciever.getImage().getBitmap(), 8, 8, HIGH, LOW); //... und zeige das empfangene Bild an.
-    matrix.write();
+    matrix.fillScreen(LOW); //... und leere das Display.
+
+    switch(transceiver.getType()) { // Schaue nach dem Datentyp der empfangenen Übertragung:
+      case 1: { // Falls es ein String ist...
+          Serial.println();
+          Serial.println(transceiver.getString()); //... gebe ihn auf dem seriellen Monitor aus.
+          Serial.println();
+          matrix.scrollDrawText(transceiver.getString());
+        } break;
+
+      case 2: { // Falls es ein Bild ist...
+          matrix.drawBitmap(0, 0, transceiver.getImage().getBitmap(), 8, 8, HIGH, LOW); //... zeige das empfangene Bild an.
+          matrix.write();
+        } break;
+    }
   }
   if((millis() - lastReception) >= 5000) {// Wenn seit 5 Sekunden oder mehr kein Bild mehr empfangen wurde...
     matrix.fillScreen(LOW); //... leere das Display
     matrix.write();
   }
-  if(digitalRead(BUTTON_ENTER) == HIGH) {
-    transciever.sendData(image);
+  if(digitalRead(RED)) {
+    transceiver.sendData(image);
+    digitalWrite(LED_RED, HIGH);
+    delay(200);
+    digitalWrite(LED_RED, LOW);
+  }
+  if(digitalRead(BLUE)) {
+    transceiver.sendData(string);
+    digitalWrite(LED_BLUE, HIGH);
+    delay(200);
+    digitalWrite(LED_BLUE, LOW);
   }
 }
