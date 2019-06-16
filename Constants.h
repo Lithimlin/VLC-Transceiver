@@ -12,8 +12,11 @@
 const int MATRIX_PIN      = 2;
 const int RECIEVER_PIN    = 3;
 const int TRANSMITTER_PIN = 4;
+
 // SLC for LED Matrix: 13
-// DIN for LED Matrix: 11
+// (MISO for SPI: 12)
+// DIN (MOSI) for LED Matrix: 11
+// (SS for SPI: 10)
 
 #define B1                7
 #define B2                8
