@@ -21,7 +21,7 @@ const int TRANSMITTER_PIN = 4;
 #define B1                7
 #define B2                8
 #define B3                9
-#define B4                10
+#define B4                A1
 #define LED_BLUE          5
 #define LED_RED           6
 
