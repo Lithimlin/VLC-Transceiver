@@ -9,6 +9,9 @@
 #define TRANSMIT_PERIOD_MS  TRANSMIT_PERIOD/1000
 #define RECEIVE_TOLERANCE   (0.40)  //tolerance for the Receiver time measurement (between 0..1)
 
+#define STRING              1
+#define LEDBITMAP           2
+
 const int MATRIX_PIN      = 2;
 const int RECEIVER_PIN    = 3;
 const int TRANSMITTER_PIN = 4;

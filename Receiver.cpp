@@ -247,10 +247,10 @@ void Receiver::process(uint8_t value) {
         _success = true;
         //... and if it was correct, build whatever we received.
         switch (_currentReception.type) {
-          case 1: //string
+          case STRING: //string
             buildString();
             break;
-          case 2: //bitmap
+          case LEDBITMAP: //bitmap
             buildImage();
             break;
           default:
@@ -352,7 +352,7 @@ void Receiver::readType() {
 void Receiver::readSize() {
   //distinguish between bitmap and string. Btimap has two sizes, string has one.
   switch (_currentReception.type) {
-    case 1: //string
+    case STRING: //string
       //if the single size byte has been received...
       if(_receivedByteCtr == 1) {
         //... read it to the first position of _dataSize...
@@ -367,7 +367,7 @@ void Receiver::readSize() {
         _processState = ProcessState::FETCH_DATA;
       }
       break;
-    case 2: //bitmap
+    case LEDBITMAP: //bitmap
       //if the two size bytes have been received...
       if(_receivedByteCtr == 2) {
         //... read them into _dataSize...
@@ -404,7 +404,7 @@ bool Receiver::checksumCorrect() {
 
 //TODO!!!! ----------------------------------------- !!!!! --------------------------------
 void Receiver::buildImage() {
-  _lastReception.type = 2;
+  _lastReception.type = LEDBITMAP;
   uint8_t height = _currentReception.size[0];
   uint8_t size = _currentReception.size[1];
   uint8_t width = size / height;
@@ -419,7 +419,7 @@ void Receiver::buildImage() {
 }
 
 void Receiver::buildString() {
-  _lastReception.type = 1;
+  _lastReception.type = STRING;
   _lastReception.data.string = _data; // This SHOULD work
   #ifdef DEBUG
   Serial.print("Built string: \""); Serial.print(_lastReception.data.string); Serial.println('"');
