@@ -1,5 +1,3 @@
-#include <Timer.h> // Die Timer Bibilothek mit einbinden (Timer 2.1)
-
 #include <Constants.h>
 #include <LEDBitmap.h>
 #include <Transceiver.h>
@@ -20,14 +18,10 @@ int data[] = {1, 1, 1, 0, 0, 1, 1, 1,
 LEDBitmap image(8, 8, data);
 // Einen String anlegen
 String string = "Hello World!";
-// Einen Timer initialisieren
-Timer t;
-// Einen Boolean anlegen, um zwischen dem Bild und dem String zu wechseln
-bool sendImage = false;
 
 void setup() {
   // Die serielle Kommunikation mit dem seriellen Monitor starten
-  Serial.begin(2000000);
+  Serial.begin(9600);
 
   // Pins initialisieren
   pinMode(RED, INPUT);
@@ -37,38 +31,27 @@ void setup() {
   // Blaue LED einschalten
   digitalWrite(LED_BLUE, HIGH);
 
-  // Ein Event an den Timer binden, das alle 5 Sekunden "sendData" ausführt
-  int8_t sendEvent = t.every(5 * 1000, sendData, (void*)0);
-
   // Den Transmitter starten
   transceiver.startTransmitter();
 }
 
 void loop() {
   // Den Timer aktualisieren
-  t.update();
   if(digitalRead(RED)) { // Wenn der rote Button gedrückt wird...
-    sendImage = true;  //... soll als nächstes das Bild geschickt werden
-    // Lasse die LEDs entsprechend leuchten.
-    digitalWrite(LED_BLUE, LOW);
-    digitalWrite(LED_RED, HIGH);
-  }
-  if(digitalRead(BLUE)) { // Wenn der blaue Button gedrückt wird...
-    sendImage = false; //... soll als nächstes der String gesendet werden.
-    // Lasse die LEDs entsprechend leuchten.
-    digitalWrite(LED_BLUE, HIGH);
-    digitalWrite(LED_RED, LOW);
-  }
-}
-
-void sendData(void){
-  if(sendImage) { // Wenn gerade das Bild gesendet werden soll...
     //... sende das vorher initialisierte Bild...
     transceiver.sendData(image);
     Serial.println("Bild gesendet");
-  } else { // Ansonsten...
-    //... sende den vorher initialisierten String
+    digitalWrite(LED_RED, HIGH); //... und schalte die rote LED kurz an...
+    delay(500);
+    digitalWrite(LED_RED, LOW); //... und wieder aus.
+  }
+  
+  if(digitalRead(BLUE)) { // Wenn der blaue Button gedrückt wird...
+    //... sende den vorher initialisierten String...
     transceiver.sendData(string);
     Serial.println("String gesendet");
+    digitalWrite(LED_BLUE, HIGH); //... und schalte die blaue LED kurz an...
+    delay(500);
+    digitalWrite(LED_BLUE, LOW); //... und wieder aus.
   }
 }
