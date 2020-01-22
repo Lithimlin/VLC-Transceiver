@@ -6,7 +6,11 @@
 # Datatypes (KEYWORD1)
 #######################################
 
+Receiver                  KEYWORD1
+Transmitter	 							KEYWORD1
 Transceiver	              KEYWORD1
+Matrix	 									KEYWORD1
+LEDBitmap									KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -20,7 +24,7 @@ sendData									KEYWORD2
 lastTransmissionComplete	KEYWORD2
 transmitterIsStarted			KEYWORD2
 receiverIsStarted					KEYWORD2
-isRecieving								KEYWORD2
+isReceiving								KEYWORD2
 hadReceiverError					KEYWORD2
 receptionSuccessful				KEYWORD2
 getImage									KEYWORD2
@@ -32,13 +36,15 @@ setPixelValue             KEYWORD2
 getHeight                 KEYWORD2
 getWidth                  KEYWORD2
 getSize                   KEYWORD2
+drawImage	                KEYWORD2
+handleResponse            KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
 MATRIX_PIN								LITERAL1
-RECIEVER_PIN							LITERAL1
+RECEIVER_PIN							LITERAL1
 TRANSMITTER_PIN						LITERAL1
 BUTTON_1									LITERAL1
 BUTTON_2									LITERAL1
@@ -46,9 +52,13 @@ BUTTON_3									LITERAL1
 BUTTON_4									LITERAL1
 LED_RED		                LITERAL1
 LED_BLUE								  LITERAL1
+LED_YELLOW								LITERAL1
+LED_GREEN									LITERAL1
 YELLOW		                LITERAL1
 RED												LITERAL1
 BLUE											LITERAL1
 GREEN			                LITERAL1
 LED_STATUS_1		          LITERAL1
 LED_STATUS_2	            LITERAL1
+STRING	 									LITERAL1
+LEDBITMAP                 LITERAL1

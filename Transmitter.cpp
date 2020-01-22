@@ -267,7 +267,7 @@ int Transmitter::setFrequency(int frequency) {
   return Timer2.initialize(frequency);
 }
 
-static void Transmitter::_transmitBit() {
+void Transmitter::_transmitBit() {
   _instance->transmitBit();
 }
 

@@ -14,24 +14,22 @@
 
 const int MATRIX_PIN      = 2;
 const int RECEIVER_PIN    = 3;
-const int TRANSMITTER_PIN = 4;
+const int TRANSMITTER_PIN = A1;
 
 // SLC for LED Matrix: 13
 // (MISO for SPI: 12)
 // DIN (MOSI) for LED Matrix: 11
 // (SS for SPI: 10)
 
-#define B1                7
-#define B2                8
-#define B3                9
-#define B4                A1
 #define LED_BLUE          5
 #define LED_RED           6
+#define LED_YELLOW        A0
+#define LED_GREEN         A2
 
-const int BUTTON_1        = B1;
-const int BUTTON_2        = B2;
-const int BUTTON_3        = B3;
-const int BUTTON_4        = B4;
+#define BUTTON_1          7
+#define BUTTON_2          8
+#define BUTTON_3          9
+#define BUTTON_4          4
 
 const int YELLOW          = BUTTON_1;
 const int RED             = BUTTON_2;

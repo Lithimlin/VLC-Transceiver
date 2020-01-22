@@ -4,6 +4,7 @@
 #include "SimpleFIFO.h"
 #include "LEDBitmap.h"
 #include "Constants.h"
+#include "Matrix.h"
 
 #define T1 _transmit_period
 #define T2 T1*2
@@ -36,7 +37,7 @@ class Receiver
     void start();
     void stop();
     int setFrequency(int frequency);
-    bool isRecieving() { return _recieving; };
+    bool isReceiving() { return _receiving; };
     bool isStarted() { return _started; };
     bool hadError();
     bool receptionSuccessful();
@@ -44,6 +45,7 @@ class Receiver
     String getString();
     int getType();
 
+    bool handleReception(Matrix* matrix);
 
 
   private: //members
@@ -68,7 +70,7 @@ class Receiver
 
     uint16_t _transmit_period;
     bool _started;
-    bool _recieving;
+    bool _receiving;
     bool _hadError;
     bool _success;
     int _pin;
@@ -87,7 +89,7 @@ class Receiver
     SimpleFIFO _bitBuffer;
     State _state;
     ProcessState _processState;
-    static Receiver* _instance = nullptr;
+    static Receiver* _instance = NULL;
 
     void process(uint8_t value);
     void pushValue(uint8_t value);

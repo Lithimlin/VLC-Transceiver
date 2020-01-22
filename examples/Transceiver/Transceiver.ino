@@ -1,6 +1,4 @@
-#include <SPI.h>
-#include <Adafruit_GFX.h>
-#include <Max72xxPanel.h>
+#include <Matrix.h>
 
 #include <Constants.h>
 #include <Transceiver.h>
@@ -20,7 +18,7 @@ LEDBitmap image(8, 8, data);
 String string("Hello VLC!");
 
 // Das Display auf dem Matrix Pin initialisieren
-Max72xxPanel matrix = Max72xxPanel(MATRIX_PIN);
+Matrix matrix = Matrix(MATRIX_PIN);
 // Den Transmitter initialisieren
 Transceiver transceiver;
 // Eine Variable für die letzte Empfangszeit initialisieren
@@ -51,8 +49,12 @@ void setup() {
 }
 
 void loop() {
-  // Wenn ein Bild erfolgreich empfangen wurde...
-  if(transceiver.receptionSuccessful()) {
+  // Wenn eine Nachricht erfolgreich empfangen wurde...
+  if(transceiver.handleReception(&matrix)){ //... verarbeite sie mit der Matrix und...
+    lastReception = millis(); //... speichere die Zeit.
+  }
+  
+  /*if(transceiver.receptionSuccessful()) {
     lastReception = millis(); //... speichere die Zeit,...
     matrix.fillScreen(LOW); //... und leere das Display.
 
@@ -65,11 +67,12 @@ void loop() {
         } break;
 
       case 2: { // Falls es ein Bild ist...
-          matrix.drawBitmap(0, 0, transceiver.getImage().getBitmap(), 8, 8, HIGH, LOW); //... zeige das empfangene Bild an.
+          matrix.drawImage(0, 0, transceiver.getImage()); //... zeige das empfangene Bild an.
           matrix.write();
         } break;
     }
-  }
+  }*/
+  
   if((millis() - lastReception) >= 5000) {// Wenn seit 5 Sekunden oder mehr kein Bild mehr empfangen wurde...
     matrix.fillScreen(LOW); //... leere das Display
     matrix.write();

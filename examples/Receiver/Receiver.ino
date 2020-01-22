@@ -1,11 +1,11 @@
-#include <Max72xxPanel.h>
+#include <Matrix.h>
 
 #include <Constants.h>
 #include <Transceiver.h>
 #include <LEDBitmap.h>
 
 // Das Display auf dem Matrix Pin initialisieren
-Max72xxPanel matrix = Max72xxPanel(MATRIX_PIN);
+Matrix matrix = Max72xxPanel(MATRIX_PIN);
 // Den Transmitter initialisieren
 Transceiver transceiver;
 // Eine Variable für die letzte Empfangszeit initialisieren
@@ -49,6 +49,14 @@ void loop() {
         } break;
     }
   }
+  
+  // Dies ist die manuelle Variante. Sie kann durch folgenden Aufruf ersetzt werden:
+  /*
+  if(transceiver.handleReception(&matrix)){
+    lastReception = millis();
+  }
+  */
+
   if((millis() - lastReception) >= 5000) {// Wenn seit 5 Sekunden oder mehr kein String oder Bild mehr empfangen wurde...
     matrix.fillScreen(LOW); //... leere das Display
     matrix.write();

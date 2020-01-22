@@ -60,8 +60,8 @@ bool Transceiver::receiverIsStarted() {
   return _receiver.isStarted();
 }
 
-bool Transceiver::isRecieving() {
-  return _receiver.isRecieving();
+bool Transceiver::isReceiving() {
+  return _receiver.isReceiving();
 }
 
 bool Transceiver::hadReceiverError() {
@@ -82,4 +82,8 @@ String Transceiver::getString() {
 
 int Transceiver::getType() {
   return _receiver.getType();
+}
+
+bool Transceiver::handleReception(Matrix* matrix) {
+  return _receiver.handleReception(matrix);
 }

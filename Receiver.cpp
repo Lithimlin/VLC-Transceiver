@@ -1,5 +1,7 @@
 #include <Receiver.h>
 
+//#define DEBUG 1
+
 Receiver::Receiver(int frequency) :
   _transmit_period((1.0/frequency)*1000000.0),
   _currentReception(),
@@ -33,7 +35,7 @@ void Receiver::start() {
   }
 }
 
-static void Receiver::_switchState() {
+void Receiver::_switchState() {
   _instance->switchState();
 }
 
@@ -100,7 +102,7 @@ void Receiver::switchState() {
         _state = State::RX_BIT_ALTERATION;
         _value = !_value;
         pushValue(_value);
-        _recieving = true;
+        _receiving = true;
       } else {
         #ifdef DEBUG
         Serial.print("Measured time: "); Serial.print(t); Serial.println(" (start)");
@@ -118,7 +120,7 @@ void Receiver::switchState() {
         process(_value);
         if(_processState == ProcessState::RECEPTION_FINISHED) {
           _state = State::RX_IDLE;
-          _recieving = false;
+          _receiving = false;
         } else {
           if(_processState == ProcessState::ERROR) {
             handleError();
@@ -146,7 +148,7 @@ void Receiver::switchState() {
         process(_value);
         if(_processState == ProcessState::RECEPTION_FINISHED) {
           _state = State::RX_IDLE;
-          _recieving = false;
+          _receiving = false;
         } else {
           if(_processState == ProcessState::ERROR) {
             handleError();
@@ -176,7 +178,7 @@ void Receiver::switchState() {
         process(_value);
         if(_processState == ProcessState::RECEPTION_FINISHED) {
           _state = State::RX_IDLE;
-          _recieving = false;
+          _receiving = false;
         } else {
           if(_processState == ProcessState::ERROR) {
             handleError();
@@ -420,7 +422,7 @@ void Receiver::buildImage() {
 
 void Receiver::buildString() {
   _lastReception.type = STRING;
-  _lastReception.data.string = _data; // This SHOULD work
+  _lastReception.data.string = (char*) _data; // This SHOULD work
   #ifdef DEBUG
   Serial.print("Built string: \""); Serial.print(_lastReception.data.string); Serial.println('"');
   #endif
@@ -439,7 +441,7 @@ void Receiver::clear() {
   _success = false;
   _bitBuffer.flush();
   _receivedByteCtr = 0;
-  _recieving = false;
+  _receiving = false;
 }
 
 LEDBitmap Receiver::getImage() {
@@ -458,4 +460,24 @@ String Receiver::getString() {
 
 int Receiver::getType() {
   return _lastReception.type;
+}
+
+bool Receiver::handleReception(Matrix* matrix) {
+  if(receptionSuccessful()){
+    matrix->fillScreen(LOW);
+    switch(getType()) {
+      case 1: {
+        Serial.println();
+        Serial.println(getString());
+        Serial.println();
+        matrix->scrollDrawText(getString());
+      } break;
+
+      case 2: {
+        matrix->drawImage(0, 0, getImage());
+        matrix->write();
+      } break;
+    }
+  }
+  return false;
 }

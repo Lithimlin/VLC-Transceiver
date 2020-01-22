@@ -1,5 +1,3 @@
-#include <Timer.h>
-
 #include <Max72xxPanel.h>
 
 #include <Constants.h>
@@ -13,21 +11,23 @@ void setup() {
   pinMode(YELLOW, INPUT);
   pinMode(RED, INPUT);
   pinMode(BLUE, INPUT);
-  //pinMode(GREEN, INPUT);
-  
+  pinMode(GREEN, INPUT);
+
   // Stelle die LEDs als Ausgang ein
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
-  
+  pinMode(LED_YELLOW, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+
   // Serielle Kommunikation mit dem Display starten
   Serial.begin(9600);
-  
+
   // Das Display konfigurieren
   matrix.setRotation(0, 2);
   // Das Display leeren
   matrix.fillScreen(LOW);
   matrix.write();
-  
+
   // Die LEDs kurz blinken lassen
   digitalWrite(LED_BLUE, HIGH);
   Serial.println("LED Blue");
@@ -37,7 +37,15 @@ void setup() {
   Serial.println("LED Red");
   delay(500);
   digitalWrite(LED_RED, LOW);
-  
+  digitalWrite(LED_GREEN, HIGH);
+  Serial.println("LED Green");
+  delay(500);
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_YELLOW, HIGH);
+  Serial.println("LED Yellow");
+  delay(500);
+  digitalWrite(LED_YELLOW, LOW);
+
   matrix.drawChar(1, 0, '0', HIGH, LOW, 1);
   matrix.write();
 }
@@ -63,12 +71,12 @@ void loop() {
     matrix.drawChar(1, 0, 'B', HIGH, LOW, 1);
     matrix.write();
     Serial.println("Blue");
-  }/*
+  }
   // Gebe auf dem Display ein "G" aus, wenn grün gedrückt wird
   else if(digitalRead(GREEN)) {
     matrix.fillScreen(LOW);
     matrix.drawChar(1, 0, 'G', HIGH, LOW, 1);
     matrix.write();
     Serial.println("Green");
-  }*/
+  }
 }

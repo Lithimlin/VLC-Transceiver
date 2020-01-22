@@ -37,7 +37,7 @@ class Transmitter
     int _pin;
     bool _busy;
     bool _active;
-    static Transmitter *_instance = nullptr;
+    static Transmitter *_instance = NULL;
 
     int _prepFrame(LEDBitmap &image);
     int _prepFrame(String &string);

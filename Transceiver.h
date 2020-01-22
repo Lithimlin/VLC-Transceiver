@@ -28,12 +28,14 @@ class Transceiver
     bool lastTransmissionComplete();
     bool transmitterIsStarted();
     bool receiverIsStarted();
-    bool isRecieving();
+    bool isReceiving();
     bool hadReceiverError();
     bool receptionSuccessful();
     LEDBitmap getImage();
     String getString();
     int getType();
+
+    bool handleReception(Matrix* matrix);
 
   private: //members
     Transmitter _transmitter;
