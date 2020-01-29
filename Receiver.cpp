@@ -467,14 +467,14 @@ bool Receiver::handleReception(Matrix* matrix) {
     matrix->fillScreen(LOW);
     matrix->write();
     switch(getType()) {
-      case STRING: {
+      case 1: {
         Serial.println();
         Serial.println(getString());
         Serial.println();
         matrix->scrollDrawText(getString());
       } break;
 
-      case BITMAP: {
+      case 2: {
         matrix->drawImage(0, 0, getImage());
         matrix->write();
       } break;
