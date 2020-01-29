@@ -37,7 +37,7 @@ getHeight                 KEYWORD2
 getWidth                  KEYWORD2
 getSize                   KEYWORD2
 drawImage	                KEYWORD2
-handleResponse            KEYWORD2
+handleReception           KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
