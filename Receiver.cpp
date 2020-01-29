@@ -465,15 +465,16 @@ int Receiver::getType() {
 bool Receiver::handleReception(Matrix* matrix) {
   if(receptionSuccessful()){
     matrix->fillScreen(LOW);
+    matrix->write();
     switch(getType()) {
-      case 1: {
+      case STRING: {
         Serial.println();
         Serial.println(getString());
         Serial.println();
         matrix->scrollDrawText(getString());
       } break;
 
-      case 2: {
+      case BITMAP: {
         matrix->drawImage(0, 0, getImage());
         matrix->write();
       } break;
